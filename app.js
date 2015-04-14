@@ -2,6 +2,7 @@
 var express = require('express');
 var passport = require('passport');
 var InstagramStrategy = require('passport-instagram').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var http = require('http');
 var path = require('path');
 var handlebars = require('express-handlebars');
@@ -24,6 +25,7 @@ var INSTAGRAM_CALLBACK_URL = process.env.INSTAGRAM_CALLBACK_URL;
 var INSTAGRAM_ACCESS_TOKEN = "";
 var FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
 var FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
+var FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL || 'localhost:3000/auth/facebook/callback';
 Instagram.set('client_id', INSTAGRAM_CLIENT_ID);
 Instagram.set('client_secret', INSTAGRAM_CLIENT_SECRET);
 
@@ -51,6 +53,17 @@ passport.deserializeUser(function(obj, done) {
 });
 
 
+
+passport.use(new FacebookStrategy({
+    clientID : FACEBOOK_CLIENT_ID,
+    clientSecret : FACEBOOK_CLIENT_SECRET,
+    callbackURL : FACEBOOK_CALLBACK_URL
+  },
+  function(accessToken, refreshToken, profile, done) {
+      console.log(profile);
+      return done();
+  }
+))
 // Use the InstagramStrategy within Passport.
 //   Strategies in Passport require a `verify` function, which accept
 //   credentials (in this case, an accessToken, refreshToken, and Instagram
@@ -162,6 +175,11 @@ app.get('/auth/instagram',
     // function will not be called.
   });
 
+app.get('/auth/facebook', passport.authenticate('facebook'),
+  function(req, res) {
+    //
+  });
+
 // GET /auth/instagram/callback
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  If authentication fails, the user will be redirected back to the
@@ -169,6 +187,11 @@ app.get('/auth/instagram',
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/login'}),
+  function(req, res) {
+    res.redirect('/account');
+  });
+
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
     res.redirect('/account');
   });
