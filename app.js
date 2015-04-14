@@ -61,9 +61,20 @@ passport.use(new FacebookStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
       console.log(profile);
-      return done();
+      models.User.findOrCreate({
+        name : profile.username,
+        id : profile.id,
+        access_token : accessToken
+      },
+      function(err, user, created) {
+        models.User.findOrCreate({}, function(err, user, created) {
+          process.nextTick(function() {
+            return done(null, profile);
+          });
+        });
+      });
   }
-))
+));
 // Use the InstagramStrategy within Passport.
 //   Strategies in Passport require a `verify` function, which accept
 //   credentials (in this case, an accessToken, refreshToken, and Instagram
