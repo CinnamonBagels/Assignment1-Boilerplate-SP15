@@ -2,3 +2,6 @@ hello account
 <p>ID: {{user.id}}</p>
 <p>Username: {{user.username}}</p>
 <p>Name:{{user.displayName}}</p>
+{{#if isInstagram}}
+<p>You are using instagram, view your feed <a href="/photos">here</a>.</p>
+{{/if}}
