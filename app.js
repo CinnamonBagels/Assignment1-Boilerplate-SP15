@@ -148,8 +148,11 @@ app.get('/login', function(req, res){
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  console.log(req.user);
-  res.render('account', {user: req.user, isFacebook : false, isInstagram : true });
+  if(req.user.provider === 'instagram') {
+    res.render('account', {user : req.user, isFacebook : false, isInstagram : true});
+  } else {
+    res.render('account', {user: req.user, isFacebook : false, isInstagram : false });
+  }
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
