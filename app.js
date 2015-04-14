@@ -151,8 +151,8 @@ app.get('/account', ensureAuthenticated, function(req, res){
   console.log(req.user);
   if(req.user.provider === 'instagram') {
     res.render('account', {user : req.user, isFacebook : false, isInstagram : true});
-  } else {
-    res.render('account', {user: req.user, isFacebook : false, isInstagram : false });
+  } else if(req.user.provider === 'facebook') {
+    res.render('account', {user: req.user, isFacebook : true, isInstagram : false });
   }
 });
 

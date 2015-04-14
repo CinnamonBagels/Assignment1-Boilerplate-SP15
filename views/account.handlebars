@@ -3,5 +3,9 @@ hello account
 <p>Username: {{user.username}}</p>
 <p>Name:{{user.displayName}}</p>
 {{#if isInstagram}}
-<p>You are using instagram, view your feed <a href="/photos">here</a>.</p>
+<p>You are logged in with instagram, view your feed <a href="/photos">here</a>.</p>
+{{/if}}
+
+{{#if isFacebook}}
+<p>You are logged in with facebook, view your facebook stuff <a href="/facebookstuff">here</a>.</p>
 {{/if}}
