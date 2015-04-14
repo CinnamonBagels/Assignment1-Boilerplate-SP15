@@ -64,7 +64,8 @@ passport.use(new FacebookStrategy({
       models.User.findOrCreate({
         name : profile.displayName,
         id : profile.id,
-        access_token : accessToken
+        access_token : accessToken,
+        account_type : 'facebook'
       },
       function(err, user, created) {
         models.User.findOrCreate({}, function(err, user, created) {
@@ -89,7 +90,8 @@ passport.use(new InstagramStrategy({
     models.User.findOrCreate({
       "name": profile.username,
       "id": profile.id,
-      "access_token": accessToken 
+      "access_token": accessToken,
+      "account_type" : 'instagram'
     }, function(err, user, created) {
       
       // created will be true here
@@ -146,7 +148,8 @@ app.get('/login', function(req, res){
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', {user: req.user});
+  console.log(req.user);
+  res.render('account', {user: req.user, isFacebook : false, isInstagram : true });
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
