@@ -12,6 +12,7 @@ var cookieParser = require('cookie-parser');
 var dotenv = require('dotenv');
 var Instagram = require('instagram-node-lib');
 var mongoose = require('mongoose');
+var graph = require('fbgraph')
 var app = express();
 
 //local dependencies
@@ -153,9 +154,25 @@ app.get('/account', ensureAuthenticated, function(req, res){
     res.render('account', {user : req.user, isInstagram : true});
   } else if(req.user.provider === 'facebook') {
     res.render('account', {user: req.user, isFacebook : true });
+  } else {
+    res.render('account', { user: req.user });
   }
 });
 
+
+app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
+  var query = models.User.where({ name: req.user.username });
+
+  query.findOne(function(err, user) {
+    if(err) return handleError(err);
+    if(user) {
+      graph.get('likes', {limit: 5, access_token: user.access_token }, function(err, res) {
+        console.log(res);
+        res.render('facebookstuff', res);
+      });
+    }
+  });
+})
 app.get('/photos', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
