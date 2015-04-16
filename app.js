@@ -167,6 +167,7 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
     if(err) return handleError(err);
     if(user) {
       graph.get('likes', {limit: 5, access_token: user.access_token }, function(err, res) {
+        if(err) return handleError(err);
         console.log(res);
         res.render('facebookstuff', res);
       });
