@@ -161,7 +161,7 @@ app.get('/account', ensureAuthenticated, function(req, res){
 
 
 app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
-  var query = models.User.where({ name: req.user. });
+  var query = models.User.where({ name: req.user.name });
 
   query.findOne(function(err, user) {
     if(err) return handleError(err);
@@ -176,7 +176,7 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
   });
 })
 app.get('/photos', ensureAuthenticated, function(req, res){
-  var query  = models.User.where({ name: req.user.name });
+  var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
     if (err) return handleError(err);
     if (user) {
