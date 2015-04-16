@@ -171,6 +171,7 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
         res.render('facebookstuff', res);
       });
     }
+    res.send('error');
   });
 })
 app.get('/photos', ensureAuthenticated, function(req, res){
