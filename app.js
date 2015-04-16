@@ -22,11 +22,13 @@ var models = require('./models');
 dotenv.load();
 var INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 var INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
-var INSTAGRAM_CALLBACK_URL = process.env.INSTAGRAM_CALLBACK_URL;
+var INSTAGRAM_CALLBACK_URL = process.env.INSTAGRAM_CALLBACK_URL || 'localhost:3000/auth/instagram/callback';
+// var INSTAGRAM_CALLBACK_URL = 'http://localhost:3000/auth/instagram/callback';
 var INSTAGRAM_ACCESS_TOKEN = "";
 var FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
 var FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
 var FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL || 'localhost:3000/auth/facebook/callback';
+// var FACEBOOK_CALLBACK_URL = 'http://localhost:3000/auth/facebook/callback';
 Instagram.set('client_id', INSTAGRAM_CLIENT_ID);
 Instagram.set('client_secret', INSTAGRAM_CLIENT_SECRET);
 
@@ -61,7 +63,6 @@ passport.use(new FacebookStrategy({
     callbackURL : FACEBOOK_CALLBACK_URL
   },
   function(accessToken, refreshToken, profile, done) {
-      console.log(profile);
       models.User.findOrCreate({
         name : profile.displayName,
         id : profile.id,
@@ -161,18 +162,18 @@ app.get('/account', ensureAuthenticated, function(req, res){
 
 
 app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
-  var query = models.User.where({ name: req.user.name });
+  var query = models.User.where({ name: req.user.displayName });
 
   query.findOne(function(err, user) {
     if(err) return handleError(err);
     if(user) {
-      graph.get('likes', {limit: 5, access_token: user.access_token }, function(err, res) {
-        if(err) return handleError(err);
-        console.log(res);
-        res.render('facebookstuff', res);
+      graph.setAccessToken(user.access_token);
+      graph.get('/' + user.id + '/statuses', function(err, info) {
+        console.log(info);
+        if(err) return console.log(err);
+        res.render('facebookstuff', info);
       });
     }
-    res.send('error');
   });
 })
 app.get('/photos', ensureAuthenticated, function(req, res){
