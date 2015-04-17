@@ -1,3 +1,20 @@
-{{#each photos}}
-  <img src="{{url}}" class="img-responsive" class="img hashtag-img">
-{{/each}}
+{{#if photos}}
+	<div class="row">
+	  <div class="col-sm-6 col-md-4 col-lg-3">
+	{{#each photos}}
+	    <div class="thumbnail">
+	      <img class="img-responsive img hashtag-img" src="{{url}}">
+	      <div class="caption">
+	      	<p>{{cap}}</p>
+	      </div>
+	    </div>
+	{{/each}}
+	  </div>
+	</div>
+{{#else}}
+	<div class="row">
+		<div class="col-lg-12 text-center">
+			<span>It seems you have no photos on your feed :(</span>
+		</div>
+	</div>
+{{/if}}

@@ -19,16 +19,15 @@ var app = express();
 var models = require('./models');
 
 //client id and client secret here, taken from .env
+var local = true;
 dotenv.load();
 var INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 var INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
-var INSTAGRAM_CALLBACK_URL = process.env.INSTAGRAM_CALLBACK_URL || 'localhost:3000/auth/instagram/callback';
-// var INSTAGRAM_CALLBACK_URL = 'http://localhost:3000/auth/instagram/callback';
+var INSTAGRAM_CALLBACK_URL = local === false ? process.env.INSTAGRAM_CALLBACK_URL : 'http://localhost:3000/auth/instagram/callback';
 var INSTAGRAM_ACCESS_TOKEN = "";
 var FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
 var FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
-var FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL || 'localhost:3000/auth/facebook/callback';
-// var FACEBOOK_CALLBACK_URL = 'http://localhost:3000/auth/facebook/callback';
+var FACEBOOK_CALLBACK_URL = local === false ? process.env.FACEBOOK_CALLBACK_URL : 'http://localhost:3000/auth/facebook/callback';
 Instagram.set('client_id', INSTAGRAM_CLIENT_ID);
 Instagram.set('client_secret', INSTAGRAM_CLIENT_SECRET);
 
@@ -150,7 +149,6 @@ app.get('/login', function(req, res){
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  console.log(req.user);
   if(req.user.provider === 'instagram') {
     res.render('account', {user : req.user, isInstagram : true});
   } else if(req.user.provider === 'facebook') {
@@ -168,10 +166,10 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
     if(err) return handleError(err);
     if(user) {
       graph.setAccessToken(user.access_token);
-      graph.get('/' + user.id + '/statuses', function(err, info) {
-        console.log(info);
-        if(err) return console.log(err);
-        res.render('facebookstuff', info);
+      var params = { fields: "feed" };
+      graph.get('/me/posts/',  function(err, coverResponse) {
+        console.log(coverResponse);
+        res.render('facebookstuff', coverResponse);
       });
     }
   });
@@ -190,10 +188,11 @@ app.get('/photos', ensureAuthenticated, function(req, res){
             //create temporary json object
             tempJSON = {};
             tempJSON.url = item.images.low_resolution.url;
+            tempJSON.cap = JSON.stringify(item.caption.text);
             //insert json object into image array
             return tempJSON;
           });
-          res.render('photos', {photos: imageArr});
+          res.render('photos', {photos: imageArr);
         }
       }); 
     }
