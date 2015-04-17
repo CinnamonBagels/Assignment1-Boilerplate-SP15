@@ -19,7 +19,7 @@ var app = express();
 var models = require('./models');
 
 //client id and client secret here, taken from .env
-var local = true;
+var local = false;
 dotenv.load();
 var INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 var INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
@@ -166,8 +166,8 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
     if(err) return handleError(err);
     if(user) {
       graph.setAccessToken(user.access_token);
-      var params = { fields: "feed" };
-      graph.get('/me/posts/',  function(err, coverResponse) {
+      var params = { fields: "friendlists" };
+      graph.get('/me/', params,  function(err, coverResponse) {
         console.log(coverResponse);
         res.render('facebookstuff', coverResponse);
       });
