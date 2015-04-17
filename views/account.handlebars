@@ -20,7 +20,15 @@
 <div class="row">
 	<div class="col-lg-12">
 	{{#if isFacebook}}
-		<span>It seems you are using facebook, view your facebook stuff <a href="/facebookstuff">here</a>.</span>
+		<div class="row">
+			<div class="col-lg-offset-3 col-lg-6"><a href="/facebooklikes" class="btn btn-info btn-block">View your Facebook <b>Likes</b></a></div>
+		</div>
+		<div class="row">
+			<div class="col-lg-offset-3 col-lg-6"><a href="/facebookphotos" class="btn btn-info btn-block">View your Facebook <b>Photos</b></a></div>
+		</div>
+		<div class="row">
+			<div class="col-lg-offset-3 col-lg-6"><a href="/facebookfriends" class="btn btn-info btn-block">View Your Facebook <b>Friends</b></a></div>
+		</div>
 	{{/if}}
 		{{#if isInstagram}}
 		<span>It seems you are using instagram, view your instagram images <a href="/photos">here</a>.</span>

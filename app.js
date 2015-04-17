@@ -139,6 +139,22 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+function ensureFacebookAuthenticated(req, res, next) {
+  if(req.isAuthenticated() && req.user.provider === 'facebook') {
+    return next();
+  }
+
+  res.redirect('/login');
+}
+
+function ensureIgAuthenticated(req, res, next) {
+  if(req.isAuthenticated() && req.user.provider === 'instagram') {
+    return next();
+  }
+
+  res.redirect('/login')
+}
+
 //routes
 app.get('/', function(req, res){
   res.render('login');
@@ -159,22 +175,109 @@ app.get('/account', ensureAuthenticated, function(req, res){
 });
 
 
-app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
+app.get('/facebookfriends', ensureFacebookAuthenticated, function(req, res) {
+  var query = models.User.where({ name : req.user.displayName });
+query.findOne(function(err, user) {
+    if(err) return console.log(err);
+    if(user) {
+      graph.setAccessToken(user.access_token);
+      var params = { fields : 'picture' };
+      graph.get('/me/friends', function(err, friends) {
+        console.log(friends);
+        var friendData = friends.data.map(function(friend) {
+          tempJSON = {};
+          tempJSON.name = friend.name;
+          graph.get(friend.id, params, function(err, friendPic) {
+            tempJSON.url = friendPic.picture.data.url;
+            return tempJSON;
+          });
+        });
+        console.log(friendData);
+        res.render('facebookfriends', {friends : friendData, isFacebook : true, user : req.user, count : friends.summary.total_count})
+      })
+    }
+})
+});
+
+app.get('/facebookphotos', ensureFacebookAuthenticated, function(req, res) {
+  var query = models.User.where({ name : req.user.displayName });
+
+  query.findOne(function(err, user) {
+    if(err) return console.log(err);
+    if(user) {
+      graph.setAccessToken(user.access_token);
+      var params = { limit : 12 };
+
+      graph.get('/me/photos', params, function(err, photos) {
+        console.log(photos.data);
+
+        var imgArray;
+        imgArray = photos.data.map(function(photo) {
+          tempJSON = {};
+          tempJSON.url = photo.source;
+          return tempJSON;
+        });
+
+        res.render('facebookphotos', {photos : imgArray, isFacebook : true, user : req.user });
+      });
+    }
+  })
+})
+
+function secondLevel(likeDist, next, callback) {
+  graph.get(next, function(err, likes) {
+    likes.data.forEach(function(like) {
+      if(!likeDist[like.category]) {
+        likeDist[like.category] = 1;
+      } else {
+        likeDist[like.category]++;
+      }
+    });
+
+    likeDist.sort(function(e1, e2) {
+      return e1 - e2;
+    });
+
+    return callback(Object.keys(likeDist)[0], likeDist[Object.keys(likeDist)[0]]);
+  });
+}
+
+app.get('/facebooklikes', ensureFacebookAuthenticated, function(req, res) {
   var query = models.User.where({ name: req.user.displayName });
 
   query.findOne(function(err, user) {
     if(err) return handleError(err);
     if(user) {
       graph.setAccessToken(user.access_token);
-      var params = { fields: "friendlists" };
-      graph.get('/me/likes',  function(err, coverResponse) {
-        console.log(coverResponse);
-        res.render('facebookstuff', coverResponse);
+      var params = { fields : 'picture' };
+      graph.get('/me/likes', function(err, likes) {
+        var likeDist = [];
+
+        var likeArr = likes.data.map(function(like) {
+          tempJSON = {};
+          tempJSON.name = like.name;
+          tempJSON.category = like.category;
+          if(!likeDist[like.category]) {
+            likeDist[like.category] = 1;
+          } else {
+            likeDist[like.category]++;
+          }
+
+          return tempJSON;
+        });
+
+        if(likes.paging && likes.paging.next) {
+          secondLevel(likeDist, likes.paging.next, function(mostlikes, count) {
+            console.log(mostlikes);
+            res.render('facebooklikes', {likes : likes.data, isFacebook : true, user : req.user, mostLikes : mostlikes, count : count});
+          });
+        }
+
       });
     }
   });
 })
-app.get('/photos', ensureAuthenticated, function(req, res){
+app.get('/photos', ensureIgAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
     if (err) return handleError(err);
@@ -212,7 +315,7 @@ app.get('/auth/instagram',
     // function will not be called.
   });
 
-app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['user_likes', 'read_custom_friendlists']}),
+app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['user_likes', 'read_custom_friendlists', 'user_photos', 'user_friends']}),
   function(req, res) {
     //
   });

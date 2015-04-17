@@ -1,0 +1,33 @@
+<nav class="navbar navbar-inverse">
+<a class="navbar-brand" href="#">
+		{{#if isInstagram}}
+        <img alt="Brand" src="/img/Instagram_logo.png" height="30" width="30">
+		{{/if}}
+		{{#if isFacebook}}
+		<img src="/img/FacebookLogo.png" alt="Brand" height="30" width="30">
+		{{/if}}
+</a>
+<a href="/account" class="btn btn-default navbar-btn">Back to Account</a>
+<a href="/logout" class="btn btn-default navbar-btn">Logout</a>
+
+	{{#if isInstagram}}
+    <p class="navbar-text">Hello, {{user.username}}</p>
+	{{/if}}
+	{{#if isFacebook}}
+	<p class="navbar-text">Hello, {{user.displayName}}</p>
+	{{/if}}
+</nav>
+
+{{#if photos}}
+	<div class="row">
+	{{#each photos}}
+	  <div class="col-xs-6 col-md-4 col-lg-3">
+	    <a href="#" class="thumbnail">
+			<img src="{{url}}" alt="">
+	    </a>
+	  </div>
+	{{/each}}
+	</div>
+{{else}}
+YOU HAVE NO PHOTOS FOR SOME REASON
+{{/if}}
