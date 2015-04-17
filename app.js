@@ -212,7 +212,7 @@ app.get('/auth/instagram',
     // function will not be called.
   });
 
-app.get('/auth/facebook', passport.authenticate('facebook'),
+app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['user_likes']}),
   function(req, res) {
     //
   });
