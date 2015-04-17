@@ -167,7 +167,7 @@ app.get('/facebookstuff', ensureAuthenticated, function(req, res) {
     if(user) {
       graph.setAccessToken(user.access_token);
       var params = { fields: "friendlists" };
-      graph.get('/me/', params,  function(err, coverResponse) {
+      graph.get('/me/likes',  function(err, coverResponse) {
         console.log(coverResponse);
         res.render('facebookstuff', coverResponse);
       });
@@ -212,7 +212,7 @@ app.get('/auth/instagram',
     // function will not be called.
   });
 
-app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['user_likes']}),
+app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['user_likes', 'read_custom_friendlists']}),
   function(req, res) {
     //
   });
